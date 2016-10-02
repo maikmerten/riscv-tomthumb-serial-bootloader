@@ -21,6 +21,7 @@ public class BootloaderProtocol {
 		
 		long starttime = System.currentTimeMillis();
 		while(is.available() < 1) {
+			Thread.sleep(1);
 			long delta = System.currentTimeMillis() - starttime;
 			if(delta > 500) {
 				throw new Exception("timeout during byte read");

@@ -12,7 +12,7 @@ public class Main {
 	
 	public static void main(String[] args) throws Exception {
 		
-		SerialConnection ser = new SerialConnection("/dev/ttyUSB0", 9600);
+		SerialConnection ser = new SerialConnection("/dev/ttyUSB0", 230400);
 		BootloaderProtocol prot = new BootloaderProtocol(ser);
 		
 		SwingUtilities.invokeLater(new Runnable() {

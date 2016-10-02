@@ -2,7 +2,6 @@ package de.maikmerten.serialbootloader;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 
 /**
  *

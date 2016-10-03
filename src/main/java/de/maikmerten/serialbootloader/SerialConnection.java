@@ -29,6 +29,14 @@ public class SerialConnection {
 		this.port = serport;
 		this.input = serport.getInputStream();
 		this.output = serport.getOutputStream();
+		
+		// Consume any bogus input that may be buffered.
+		// The Raspberry Pi UART tends to send a bogus byte when
+		// opening a serial connection. Consume whatever reply comes in
+		Thread.sleep(50);
+		while(this.input.available() > 0) {
+			input.read();
+		}
 	}
 	
 

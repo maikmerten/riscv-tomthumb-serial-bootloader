@@ -20,7 +20,7 @@ public class BootloaderProtocol {
 		
 		long starttime = System.currentTimeMillis();
 		while(is.available() < 1) {
-			Thread.sleep(1);
+			//Thread.sleep(1);
 			long delta = System.currentTimeMillis() - starttime;
 			if(delta > 500) {
 				throw new Exception("timeout during byte read");
@@ -30,21 +30,22 @@ public class BootloaderProtocol {
 		return (byte)(is.read() & 0xFF);
 	}
 	
-	private void byteOut(byte b) throws Exception {
+	private void bytesOut(byte[] bytes) throws Exception {
 		OutputStream os = conn.getOutputStream();
-		byte[] buf = {b};
-		os.write(buf);
+		os.write(bytes);
 	}
 	
 	private void cmdOut(byte[] command) throws Exception {
+		int checksum = 0;
 		for(int i = 0; i < command.length; ++i) {
-			byte out = command[i];
-			byteOut(out);
-			byte in = byteIn();
+			checksum ^= (command[i] & 0xFF);
+		}
+		bytesOut(command);
+		
+		int in = byteIn() & 0xFF;
 			
-			if(out != in) {
-				throw new Exception("Command was not mirrored correctly");
-			}
+		if(checksum != in) {
+			throw new Exception("Invalid checksum received, expected " + checksum + " but received " + in);
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package de.maikmerten.serialbootloader;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -22,7 +23,7 @@ public class BootloaderProtocol {
 		while(is.available() < 1) {
 			//Thread.sleep(1);
 			long delta = System.currentTimeMillis() - starttime;
-			if(delta > 500) {
+			if(delta > 2000) {
 				throw new Exception("timeout during byte read");
 			}
 		}
@@ -67,11 +68,23 @@ public class BootloaderProtocol {
 		return byteIn();
 	}
 	
-	public void writeByte(byte b) throws Exception {
+	public void writeBytes(byte[] data) throws Exception {
 		byte op = 'W';
-		byte[] cmd = {op, b};
-		cmdOut(cmd);
+		
+		int len = data.length;
+		byte l0 = (byte)((len >> 24) & 0xFF);
+		byte l1 = (byte)((len >> 16) & 0xFF);
+		byte l2 = (byte)((len >> 8) & 0xFF);
+		byte l3 = (byte)(len & 0xFF);
+		byte[] head = {op, l0, l1, l2, l3};
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(head.length + data.length);
+		baos.write(head);
+		baos.write(data);
+
+		cmdOut(baos.toByteArray());
 	}
+	
 	
 	public void call() throws Exception {
 		byte op = 'C';
@@ -93,10 +106,7 @@ public class BootloaderProtocol {
 	
 	public void writeMemArea(long address, byte[] data) throws Exception {
 		writeAddress(address);
-		
-		for(byte b : data) {
-			writeByte(b);
-		}
+		writeBytes(data);
 	}
 	
 	public void callAddress(long address) throws Exception {
